@@ -14,18 +14,18 @@
 </head>
 <body class="d-flex justify-content-center align-items-center vh-100 bg-light">
 <div class="card p-4 shadow-sm">
-  <h2 class="text-center">Đăng nhập</h2>
+  <h2 class="text-center">Login</h2>
   <form action="login" method="post">
     <% String error = (String) request.getAttribute("error"); %>
     <% if (error != null) { %>
       <div class="alert alert-danger"><%= error %></div>
     <% } %>
     <div class="mb-3">
-      <label class="form-label">Tài khoản:</label>
+      <label class="form-label">Username:</label>
       <input type="text" name="username" class="form-control" required>
     </div>
     <div class="mb-3">
-      <label class="form-label">Mật khẩu:</label>
+      <label class="form-label">Password:</label>
       <input type="password" name="password" class="form-control" required>
     </div>
     <button type="submit" class="btn btn-primary w-100">Login</button>

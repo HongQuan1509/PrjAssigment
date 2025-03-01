@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
 <body class="container mt-5">
+ <jsp:include page="../banner/banner.jsp"></jsp:include>
 <h2 class="text-center">Đơn xin nghỉ phép</h2>
 
 <c:if test="${not empty message}">
@@ -23,18 +24,18 @@
     <div class="alert alert-danger">${error}</div>
 </c:if>
 
-<form action="leave/request" method="post" class="card p-4 shadow-sm">
+<form action="create" method="post" class="card p-4 shadow-sm">
     <div class="mb-3">
         <label class="form-label">Tiêu đề:</label>
         <input type="text" name="title" class="form-control" required>
     </div>
     <div class="mb-3">
         <label class="form-label">Từ ngày:</label>
-        <input type="date" name="start_date" class="form-control" required>
+        <input type="date" name="from" class="form-control" required>
     </div>
     <div class="mb-3">
         <label class="form-label">Đến ngày:</label>
-        <input type="date" name="end_date" class="form-control" required>
+        <input type="date" name="to" class="form-control" required>
     </div>
     <div class="mb-3">
         <label class="form-label">Lý do:</label>

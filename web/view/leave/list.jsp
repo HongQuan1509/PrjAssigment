@@ -10,21 +10,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Yêu cầu nghỉ phép</title>
+    <title>Leave Request</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
 <body class="container mt-5">
-<h2 class="text-center">Yêu cầu nghỉ phép</h2>
+     <jsp:include page="../banner/banner.jsp"></jsp:include>
+
+<h2 class="text-center">Leave Request List</h2>
 
 <table class="table table-bordered table-striped">
     <thead class="table-dark">
     <tr>
-        <th>Đơn nghỉ</th>
-        <th>Từ</th>
-        <th>Đến</th>
-        <th>Người tạo</th>
-        <th>Trạng thái</th>
-        <th>Người xác nhận</th>
+        <th>Title</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Created By</th>
+        <th>Status</th>
+        <th>Processed By</th>
     </tr>
     </thead>
     <tbody>

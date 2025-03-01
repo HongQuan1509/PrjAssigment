@@ -23,7 +23,7 @@ public class UserDBContext extends DBContext<User> {
         try {
             String sql = "SELECT u.username,u.displayname\n" +
 "                    		,r.rid,r.rname\n" +
-"                    		,f.fid,f.url\n" +
+"                    		,f.fid,f.url,f.fname\n" +
 "                    	,e.eid,e.ename\n" +
 "                    FROM Users u INNER JOIN Employees e ON e.eid = u.eid\n" +
 "                     LEFT JOIN User_Role ur ON u.username = ur.username\n" +
@@ -66,6 +66,7 @@ public class UserDBContext extends DBContext<User> {
                     Feature f = new Feature();
                     f.setId(rs.getInt("fid"));
                     f.setUrl(rs.getString("url"));
+                    f.setName(rs.getString("fname"));
                     current_role.getFeatures().add(f);
                     f.getRoles().add(current_role);
                 }
