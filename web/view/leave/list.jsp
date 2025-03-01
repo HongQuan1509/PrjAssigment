@@ -21,25 +21,32 @@
 <table class="table table-bordered table-striped">
     <thead class="table-dark">
     <tr>
-        <th>Title</th>
-        <th>Start Date</th>
-        <th>End Date</th>
-        <th>Created By</th>
-        <th>Status</th>
-        <th>Processed By</th>
+                <td>Id</td>
+                <td>Title</td>
+                <td>Reason</td>
+                <td>From</td>
+                <td>To</td>
+                <td>Created By</td>
+                <td>Created Date</td>
+                <td>Status</td>
     </tr>
     </thead>
     <tbody>
-    <c:forEach var="request" items="${leaveRequests}">
+    <c:forEach var="request" items="${list}">
         <tr>
             <td>
-                <a href="request/${request.id}">${request.title}</a>
+                <c:url value="/leaverequest/review" var="reviewUrl">
+                    <c:param name="title" value="${request.title}" />
+                </c:url>
+                <a href="${reviewUrl}">${request.title}</a>
             </td>
-            <td>${request.startDate}</td>
-            <td>${request.endDate}</td>
-            <td>${request.createdBy}</td>
-            <td>${request.status}</td>
-            <td>${request.processedBy}</td>
+            <td>${request.title}</td>
+            <td>${request.reason}</td>
+            <td>${request.from}</td>
+            <td>${request.to}</td>
+            <td>${request.createdby.displayname}</td>
+            <td>${request.createddate}</td>
+            <td>${request.status eq 0?"In Progress":(request.status eq 1)?"Rejected":"Accepted"}</td>
         </tr>
     </c:forEach>
     </tbody>

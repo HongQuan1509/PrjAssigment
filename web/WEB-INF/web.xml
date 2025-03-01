@@ -8,13 +8,21 @@
         <servlet-name>HomeController</servlet-name>
         <servlet-class>controller.auth.HomeController</servlet-class>
     </servlet>
-        <servlet>
+    <servlet>
         <servlet-name>LogoutController</servlet-name>
         <servlet-class>controller.auth.LogoutController</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>CreateController</servlet-name>
         <servlet-class>controller.leaverequest.CreateController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ListController</servlet-name>
+        <servlet-class>controller.leaverequest.ListController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ReviewController</servlet-name>
+        <servlet-class>controller.leaverequest.ReviewController</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginController</servlet-name>
@@ -24,12 +32,20 @@
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
     </servlet-mapping>
-        <servlet-mapping>
+    <servlet-mapping>
         <servlet-name>LogoutController</servlet-name>
         <url-pattern>/logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>CreateController</servlet-name>
         <url-pattern>/leaverequest/create</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ListController</servlet-name>
+        <url-pattern>/leaverequest/list</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReviewController</servlet-name>
+        <url-pattern>/leaverequest/review</url-pattern>
     </servlet-mapping>
 </web-app>
