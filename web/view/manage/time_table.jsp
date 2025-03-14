@@ -11,7 +11,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Thời gian làm việc</title>
+    <title>Work Time</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
@@ -21,18 +21,19 @@
     </style>
 </head>
 <body class="container mt-5">
-<h2 class="text-center"> Thời gian làm việc </h2>
+    <jsp:include page="../banner/banner.jsp"></jsp:include>
+<h2 class="text-center"> Work Time </h2>
 
 <!-- Dropdown chọn năm và tháng -->
 <div class="d-flex align-items-center mb-3">
-    <label class="me-2"><b>Tháng</b></label>
+    <label class="me-2"><b>Month</b></label>
     <select id="monthSelect" class="form-select w-auto" onchange="updateCalendar()">
         <c:forEach var="i" begin="0" end="11">
-            <option value="${i}" ${i == currentMonth ? 'selected' : ''}>Tháng ${i + 1}</option>
+            <option value="${i}" ${i == currentMonth ? 'selected' : ''}>thang ${i + 1}</option>
         </c:forEach>
     </select>
 
-    <label class="me-2"><b>Năm</b></label>
+    <label class="me-2"><b>Year</b></label>
     <select id="yearSelect" class="form-select w-auto me-3" onchange="updateCalendar()">
         <c:forEach var="i" begin="${currentYear - 2}" end="${currentYear + 2}">
             <option value="${i}" ${i == currentYear ? 'selected' : ''}>${i}</option>
@@ -44,13 +45,13 @@
 <table class="table table-bordered text-center">
     <thead class="table-dark">
     <tr>
-        <th>Thứ 2</th>
-        <th>Thứ 3</th>
-        <th>Thứ 4</th>
-        <th>Thứ 5</th>
-        <th>Thứ 6</th>
-        <th>Thứ 7</th>
-        <th>Chủ Nhật</th>
+        <th>Monday</th>
+        <th>Tuesday</th>
+        <th>Wednesday</th>
+        <th>Thursday</th>
+        <th>Friday</th>
+        <th>Saturday</th>
+        <th>Sunday</th>
     </tr>
     </thead>
     <tbody id="calendarBody">
