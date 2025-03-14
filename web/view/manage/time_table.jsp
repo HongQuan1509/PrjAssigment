@@ -35,7 +35,7 @@
             </style>
         </head>
 
-        <body class="container mt-5">
+        <body>
 
             <h2 class="text-center mb-4">Employee Work Calendar</h2>
 

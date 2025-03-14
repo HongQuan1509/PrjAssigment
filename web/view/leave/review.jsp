@@ -13,7 +13,7 @@
         <title>Request Approval</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     </head>
-    <body class="container mt-5">
+    <body>
         <jsp:include page="../banner/banner.jsp"></jsp:include>
             <h2 class="text-center">Request Approval</h2>
             <div class="card p-4 shadow-sm" style="max-width: 500px; margin: auto;">

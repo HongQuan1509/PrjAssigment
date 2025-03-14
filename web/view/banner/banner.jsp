@@ -13,20 +13,20 @@
         <title>JSP Page</title>
     </head>
     <body>
-       <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="<c:url value='/home'/>">Leave Request Management</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <span class="nav-link">Hi, <strong>${user.displayname}</strong>!</span>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link btn btn-danger text-white" href="<c:url value='/logout'/>">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="<c:url value='/home'/>">Leave Request Management</a>
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <span class="nav-link">Hi, <strong>${user.displayname}</strong>!</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-danger text-white" href="<c:url value='/logout'/>">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
     </body>
 </html>
