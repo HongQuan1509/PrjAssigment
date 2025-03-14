@@ -32,6 +32,15 @@ public abstract class DBContext<T> {
         ex.printStackTrace();
     }
 }
+    public void close() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
     
     public abstract ArrayList<T> list();
     public abstract T get(int id);
