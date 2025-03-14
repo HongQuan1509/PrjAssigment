@@ -74,7 +74,7 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
         } catch (SQLException ex) {
             Logger.getLogger(LeaveRequestDBContext.class
                     .getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
         return r;
 
     }
@@ -122,8 +122,55 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
             }
         } catch (SQLException ex) {
             Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        return r; 
+        }
+        return r;
+    }
+
+    public ArrayList<LeaveRequest> getByCreator(String createdby) {
+        ArrayList<LeaveRequest> list = new ArrayList<>();
+        try {
+            String sql = "SELECT r.rid, r.title, r.reason, r.[from], r.[to], r.createddate, r.[status], "
+                    + "u.username, u.displayname, e.eid, e.ename, d.did, d.dname "
+                    + "FROM LeaveRequest r "
+                    + "INNER JOIN Users u ON u.username = r.createdby "
+                    + "INNER JOIN Employees e ON e.eid = u.eid "
+                    + "INNER JOIN Departments d ON d.did = e.did "
+                    + "WHERE r.createdby = ?";
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setString(1, createdby);
+            ResultSet rs = stm.executeQuery();
+            while (rs.next()) {
+                LeaveRequest r = new LeaveRequest();
+                r.setId(rs.getInt("rid"));
+                r.setTitle(rs.getString("title"));
+                r.setReason(rs.getString("reason"));
+                r.setFrom(rs.getDate("from"));
+                r.setTo(rs.getDate("to"));
+                r.setCreateddate(rs.getTimestamp("createddate"));
+                r.setStatus(rs.getInt("status"));
+
+                User u = new User();
+                u.setUsername(rs.getString("username"));
+                u.setDisplayname(rs.getString("displayname"));
+                r.setCreatedby(u);
+
+                Employee e = new Employee();
+                u.setE(e);
+                e.setId(rs.getInt("eid"));
+                e.setName(rs.getString("ename"));
+
+//                EmployeeDBContext db = new EmployeeDBContext();
+//                e.setManager(db.get(rs.getInt("managerid")));
+                Department d = new Department();
+                e.setDept(d);
+                d.setId(rs.getInt("did"));
+                d.setName(rs.getString("dname"));
+                list.add(r);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
     }
 
     @Override
@@ -210,7 +257,7 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
         } catch (SQLException ex) {
             Logger.getLogger(LeaveRequestDBContext.class
                     .getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
         return requests;
     }
 
@@ -230,7 +277,7 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
             System.out.println(rows);
         } catch (SQLException ex) {
             Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
     }
 
     @Override
