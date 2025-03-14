@@ -210,13 +210,42 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
     public ArrayList<LeaveRequest> getByManager(int managerId) {
         ArrayList<LeaveRequest> requests = new ArrayList<>();
         try {
-            String sql = "SELECT r.rid, r.title, r.reason, r.[from], r.[to], r.createddate, r.[status], "
-                    + "u.username, u.displayname, e.eid, e.ename, d.did, d.dname "
-                    + "FROM LeaveRequest r "
-                    + "INNER JOIN Users u ON u.username = r.createdby "
-                    + "INNER JOIN Employees e ON e.eid = u.eid "
-                    + "INNER JOIN Departments d ON d.did = e.did "
-                    + "WHERE e.managerid = ?";
+            String sql = "WITH EmployeeHierarchy AS (\n"
+                    + "    SELECT \n"
+                    + "        eid,\n"
+                    + "		ename,\n"
+                    + "        managerid,\n"
+                    + "		did,\n"
+                    + "        0 AS [Level]\n"
+                    + "    FROM Employees\n"
+                    + "    WHERE eid = ? \n"
+                    + "\n"
+                    + "    UNION ALL\n"
+                    + "\n"
+                    + "    SELECT \n"
+                    + "        e.eid,\n"
+                    + "		e.ename,\n"
+                    + "        e.managerid,\n"
+                    + "		e.did,\n"
+                    + "        eh.Level + 1\n"
+                    + "    FROM Employees e\n"
+                    + "    INNER JOIN EmployeeHierarchy eh ON eh.eid = e.managerid\n"
+                    + ")\n"
+                    + "\n"
+                    + "SELECT \n"
+                    + "    lr.rid,\n"
+                    + "    lr.title,\n"
+                    + "    lr.reason,\n"
+                    + "    lr.[from],\n"
+                    + "    lr.[to],\n"
+                    + "    lr.status,\n"
+                    + "lr.createddate,\n"
+                    + "	u.username, u.displayname, eh.eid, eh.ename, d.did, d.dname\n"
+                    + "FROM EmployeeHierarchy eh\n"
+                    + "INNER JOIN Users u ON u.eid = eh.eid\n"
+                    + "INNER JOIN LeaveRequest lr ON lr.createdby = u.username\n"
+                    + "INNER JOIN Departments d ON d.did = eh.did\n"
+                    + "WHERE eh.Level > 0;";
 
             PreparedStatement stm = connection.prepareStatement(sql);
             stm.setInt(1, managerId);
@@ -259,6 +288,43 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
                     .getName()).log(Level.SEVERE, null, ex);
         }
         return requests;
+    }
+
+    public ArrayList<LeaveRequest> getLeaveDatesByEmployeeAndMonth(int employeeId, int month, int year) {
+        ArrayList<LeaveRequest> list = new ArrayList<>();
+
+        String sql = "WITH EmployeeHierarchy AS (\n"
+                + "    SELECT \n"
+                + "        eid,\n"
+                + "        managerid,\n"
+                + "        0 AS [Level]\n"
+                + "    FROM Employees\n"
+                + "    WHERE eid = ?  -- Thay 1 bằng eid của người quản lý bạn muốn xem\n"
+                + "\n"
+                + "    UNION ALL\n"
+                + "\n"
+                + "    SELECT \n"
+                + "        e.eid,\n"
+                + "        e.managerid,\n"
+                + "        eh.Level + 1\n"
+                + "    FROM Employees e\n"
+                + "    INNER JOIN EmployeeHierarchy eh ON eh.eid = e.managerid\n"
+                + ")\n"
+                + "\n"
+                + "SELECT \n"
+                + "    lr.rid,\n"
+                + "    lr.title,\n"
+                + "    lr.reason,\n"
+                + "    lr.[from],\n"
+                + "    lr.[to],\n"
+                + "    lr.status,\n"
+                + "    lr.createdby\n"
+                + "FROM EmployeeHierarchy eh\n"
+                + "INNER JOIN Users u ON u.eid = eh.eid\n"
+                + "INNER JOIN LeaveRequest lr ON lr.createdby = u.username\n"
+                + "WHERE eh.Level > 0;";
+
+        return list;
     }
 
     @Override
