@@ -32,6 +32,7 @@ public class HomeController extends BaseRequiredAuthenticationController {
         user.getRoles().forEach(role
                 -> role.getFeatures().stream()
                         .filter(feature -> !feature.getUrl().contains("/leaverequest/review"))
+                        .filter(feature -> !feature.getUrl().contains("/home"))
                         .forEach(features::add)
         );
 
