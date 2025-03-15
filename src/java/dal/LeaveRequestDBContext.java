@@ -8,6 +8,7 @@ import data.Department;
 import data.Employee;
 import data.LeaveRequest;
 import data.User;
+import dto.LeaveDateDTO;
 import java.util.ArrayList;
 import java.sql.*;
 import java.util.logging.Level;
@@ -290,41 +291,41 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
         return requests;
     }
 
-    public ArrayList<LeaveRequest> getLeaveDatesByEmployeeAndMonth(int employeeId, int month, int year) {
-        ArrayList<LeaveRequest> list = new ArrayList<>();
+    public ArrayList<LeaveDateDTO> getLeaveDatesByEmployeeAndMonth(int employeeId, int month, int year) {
+        ArrayList<LeaveDateDTO> leaveDates = new ArrayList<>();
 
-        String sql = "WITH EmployeeHierarchy AS (\n"
-                + "    SELECT \n"
-                + "        eid,\n"
-                + "        managerid,\n"
-                + "        0 AS [Level]\n"
-                + "    FROM Employees\n"
-                + "    WHERE eid = ?  -- Thay 1 bằng eid của người quản lý bạn muốn xem\n"
-                + "\n"
-                + "    UNION ALL\n"
-                + "\n"
-                + "    SELECT \n"
-                + "        e.eid,\n"
-                + "        e.managerid,\n"
-                + "        eh.Level + 1\n"
-                + "    FROM Employees e\n"
-                + "    INNER JOIN EmployeeHierarchy eh ON eh.eid = e.managerid\n"
-                + ")\n"
-                + "\n"
-                + "SELECT \n"
-                + "    lr.rid,\n"
-                + "    lr.title,\n"
-                + "    lr.reason,\n"
-                + "    lr.[from],\n"
-                + "    lr.[to],\n"
-                + "    lr.status,\n"
-                + "    lr.createdby\n"
-                + "FROM EmployeeHierarchy eh\n"
-                + "INNER JOIN Users u ON u.eid = eh.eid\n"
-                + "INNER JOIN LeaveRequest lr ON lr.createdby = u.username\n"
-                + "WHERE eh.Level > 0;";
+        String sql = "SELECT lr.[from], lr.[to] FROM LeaveRequest lr "
+                + "INNER JOIN [Users] u ON lr.createdby = u.username\n"
+                + "INNER JOIN Employees e ON u.eid = e.eid\n"
+                + "WHERE e.eid = ? AND status = 2 "
+                + "AND ((YEAR([from]) = ? AND MONTH([from]) = ?) "
+                + "  OR (YEAR([to]) = ? AND MONTH([to]) = ?))";
 
-        return list;
+        try {
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setInt(1, employeeId);
+            stm.setInt(2, year);
+            stm.setInt(3, month);
+            stm.setInt(4, year);
+            stm.setInt(5, month);
+
+            ResultSet rs = stm.executeQuery();
+
+            while (rs.next()) {
+                LeaveDateDTO date = new LeaveDateDTO();
+                date.setFrom(rs.getDate("from").toLocalDate());
+                date.setTo(rs.getDate("to").toLocalDate());
+                leaveDates.add(date);
+            }
+
+            rs.close();
+            stm.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return leaveDates;
     }
 
     @Override

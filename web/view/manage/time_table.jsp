@@ -17,17 +17,18 @@
 
             <style>
                 .working-day {
-                    background-color: #d4edda;
-                } /* Green */
+                    background-color: #d4edda !important;
+                }
                 .leave-day {
-                    background-color: #f8d7da;
-                }   /* Red */
+                    background-color: #f8d7da !important;
+                }
                 .empty-day {
-                    background-color: #f1f1f1;
-                }   /* Gray */
+                    background-color: #f1f1f1 !important;
+                }
                 .today {
-                    border: 2px solid #007bff;
-                }       /* Blue border */
+                    border: 2px solid #007bff !important;
+                }
+
                 td {
                     height: 100px;
                     vertical-align: top;
@@ -38,53 +39,69 @@
         <body>
 
             <h2 class="text-center mb-4">Employee Work Calendar</h2>
+            <form id="calendarForm" action="time-table" method="GET" class="row justify-content-center mb-4">
 
-            <!-- Filters -->
-            <div class="row justify-content-center mb-4">
+                <!-- Filters -->
                 <div class="col-auto">
                     <label class="form-label"><strong>Employee</strong></label>
-                    <select id="employeeSelect" class="form-select">
+                    <select id="employeeSelect" name="employeeId" class="form-select" onchange="submitForm()">
 
                     <c:forEach var="emp" items="${directstaffs}">
-                        <option value="${emp.id}">${emp.name}</option>
+                        <option value="${emp.id}" ${employeeId == emp.id ?'selected':' '}>${emp.name}</option>
                     </c:forEach>
                 </select>
             </div>
-
-            <div class="col-auto">
-                <label class="form-label"><strong>Month</strong></label>
-                <select id="monthSelect" class="form-select"></select>
-            </div>
-
-            <div class="col-auto">
-                <label class="form-label"><strong>Year</strong></label>
-                <select id="yearSelect" class="form-select"></select>
-            </div>
         </div>
 
-        <!-- Calendar Table -->
-        <table class="table table-bordered text-center">
-            <thead class="table-dark">
+        <div class="col-auto">
+            <label for="monthSelect" class="form-label"><strong>Month</strong></label>
+            <select id="monthSelect" name="month" class="form-select" onchange="submitForm()">
+                <c:forEach var="m" begin="1" end="12">
+                    <option value="${m}" ${m == month ? 'selected' : ''}>${m}</option>
+                </c:forEach>
+            </select>
+        </div>
+
+        <div class="col-auto">
+            <label for="yearSelect" class="form-label"><strong>Year</strong></label>
+            <select id="yearSelect" name="year" class="form-select" onchange="submitForm()">
+                <c:forEach var="y" begin="${year - 5}" end="${year + 5}">
+                    <option value="${y}" ${y == year ? 'selected' : ''}>${y}</option>
+                </c:forEach>
+            </select>
+        </div>
+
+
+    </form>
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
+            </tr>
+        </thead>
+        <tbody>
+            <c:forEach var="week" items="${calendarData}">
                 <tr>
-                    <th>Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                    <th>Saturday</th>
-                    <th>Sunday</th>
+                    <c:forEach var="day" items="${week}">
+                        <td class="${day.type} ${day.isToday ? 'today' : ''}">
+                            <c:if test="${day.day > 0}">${day.day}</c:if>
+                            </td>
+                    </c:forEach>
                 </tr>
-            </thead>
-            <tbody id="calendarBody"></tbody>
-        </table>
+            </c:forEach>
+        </tbody>
+    </table>
+    <script>
+        function submitForm() {
+            document.getElementById('calendarForm').submit();
+        }
+    </script>
 
-        <!-- JS to load calendar -->
-        <script src="../js/calendar.js"></script>
-        <script>
-            const currentYear = ${year}; // Inject từ server vào
-            const currentMonth = ${month}; // Inject từ server vào
-            initCalendar(currentYear, currentMonth);
-        </script>
-
-    </body>
+</body>
 </html>
