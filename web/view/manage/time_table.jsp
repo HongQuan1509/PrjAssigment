@@ -16,6 +16,10 @@
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 
             <style>
+                .weekend-day {
+                    background-color: #fff3cd !important; /* Màu vàng nhạt cho weekend */
+                }
+
                 .working-day {
                     background-color: #d4edda !important;
                 }

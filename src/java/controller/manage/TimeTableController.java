@@ -61,21 +61,19 @@ public class TimeTableController extends BaseRequiredAuthenticationController {
         // Tạo calendarData: List<List<Map<String, Object>>>
         List<List<Map<String, Object>>> calendarData = buildCalendar(year, month, leaveDaysSet);
 
-        
-        
         // Forward data về JSP
         req.setAttribute("calendarData", calendarData);
         req.setAttribute("employeeId", employeeId);
         req.setAttribute("month", month);
         req.setAttribute("year", year);
         req.setAttribute("directstaffs", staffs);
-        
+
         //url
         req.getRequestDispatcher("/view/manage/time_table.jsp").forward(req, resp);
     }
 
     private List<List<Map<String, Object>>> buildCalendar(int year, int month, Set<LocalDate> leaveDaysSet) {
-       List<List<Map<String, Object>>> calendarData = new ArrayList<>();
+        List<List<Map<String, Object>>> calendarData = new ArrayList<>();
 
         LocalDate firstDay = LocalDate.of(year, month, 1);
         int daysInMonth = YearMonth.of(year, month).lengthOfMonth();
@@ -89,7 +87,9 @@ public class TimeTableController extends BaseRequiredAuthenticationController {
             for (int dow = 0; dow < 7; dow++) {
                 Map<String, Object> dayCell = new HashMap<>();
 
-                if ((calendarData.isEmpty() && dow < (firstDayOfWeek == 0 ? 6 : firstDayOfWeek - 1)) || currentDay > daysInMonth) {
+                boolean isWeekend = dow == 5 || dow == 6;
+
+                if ((calendarData.isEmpty() && dow < firstDayOfWeek) || currentDay > daysInMonth) {
                     dayCell.put("day", 0);
                     dayCell.put("type", "empty-day");
                 } else {
@@ -97,9 +97,16 @@ public class TimeTableController extends BaseRequiredAuthenticationController {
                     boolean isToday = currentDate.equals(LocalDate.now());
                     boolean isLeave = leaveDaysSet.contains(currentDate);
 
+                    String type;
+                    if (isWeekend) {
+                        type = "weekend-day"; // màu riêng cho t7-cn
+                    } else {
+                        type = isLeave ? "leave-day" : "working-day";
+                    }
+
                     dayCell.put("day", currentDay);
                     dayCell.put("isToday", isToday);
-                    dayCell.put("type", isLeave ? "leave-day" : "working-day");
+                    dayCell.put("type", type);
 
                     currentDay++;
                 }
@@ -112,6 +119,5 @@ public class TimeTableController extends BaseRequiredAuthenticationController {
 
         return calendarData;
     }
-    
 
 }
