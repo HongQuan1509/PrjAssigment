@@ -17,7 +17,7 @@
         <jsp:include page="../banner/banner.jsp"></jsp:include>
             <h2 class="text-center">Request Approval</h2>
             <div class="card p-4 shadow-sm" style="max-width: 500px; margin: auto;">
-                <p><strong>Created By:</strong> <span>${lr.createdby.e.name}</span></p>
+            <p><strong>Created By:</strong> <span>${lr.createdby.e.name}</span></p>
             <p><strong>Start Date:</strong> <span>${lr.from}</span></p>
             <p><strong>End Date:</strong> <span>${lr.to}</span></p>
             <p><strong>Reason:</strong> <span>${lr.reason}</span></p>

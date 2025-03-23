@@ -25,6 +25,62 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
+    public int count(int mid) {
+        try {
+            String sql = "WITH EmployeeHierarchy AS ( \n"
+                    + "                    SELECT eid, ename, managerid, did, 0 AS [Level] \n"
+                    + "                    FROM Employees WHERE eid = ? \n"
+                    + "                    UNION ALL \n"
+                    + "                    SELECT e.eid, e.ename, e.managerid, e.did, eh.Level + 1 \n"
+                    + "                    FROM Employees e INNER JOIN EmployeeHierarchy eh ON eh.eid = e.managerid \n"
+                    + "                    ) \n"
+                    + "SELECT Count(*)\n"
+                    + "FROM EmployeeHierarchy eh\n"
+                    + "  INNER JOIN Users u ON u.eid = eh.eid\n"
+                    + "                      INNER JOIN LeaveRequest lr ON lr.createdby = u.username \n"
+                    + "                    INNER JOIN Departments d ON d.did = eh.did\n"
+                    + "					WHERE eh.[Level] > 0";
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setInt(1, mid);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (connection != null)
+                try {
+                connection.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return -1;
+    }
+
+    public int countMy(String createby) {
+        try {
+            String sql = "SELECT COUNT(*) FROM LeaveRequest WHERE createdby = ?";
+            PreparedStatement stm = connection.prepareStatement(sql);
+            stm.setString(1, createby);
+            ResultSet rs = stm.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (connection != null)
+                try {
+                connection.close();
+            } catch (SQLException ex) {
+                Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return -1;
+    }
+
     @Override
     public LeaveRequest get(int id) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
@@ -84,15 +140,15 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
         LeaveRequest r = new LeaveRequest();
         try {
             String sql = "SELECT r.rid, r.title, r.reason, r.[from], r.[to], r.createddate, r.[status], "
-                    + "u.username, u.displayname, e.eid, e.ename, d.did, d.dname "
+                    + "u.username, u.displayname, e.eid, e.ename,e.managerid, d.did, d.dname "
                     + "FROM LeaveRequest r "
                     + "INNER JOIN Users u ON u.username = r.createdby "
                     + "INNER JOIN Employees e ON e.eid = u.eid "
                     + "INNER JOIN Departments d ON d.did = e.did "
-                    + "WHERE e.managerid = ? AND r.title = ?";
+                    + "WHERE r.title = ?";
             PreparedStatement stm = connection.prepareStatement(sql);
-            stm.setInt(1, mid);
-            stm.setString(2, title);
+
+            stm.setString(1, title);
             ResultSet rs = stm.executeQuery();
             while (rs.next()) {
                 r.setId(rs.getInt("rid"));
@@ -114,7 +170,7 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
                 e.setName(rs.getString("ename"));
 
                 EmployeeDBContext db = new EmployeeDBContext();
-                e.setManager(db.get(mid));
+                e.setManager(db.get(rs.getInt("managerid")));
 
                 Department d = new Department();
                 e.setDept(d);
@@ -127,8 +183,18 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
         return r;
     }
 
-    public ArrayList<LeaveRequest> getByCreator(String createdby) {
+    public ArrayList<LeaveRequest> getByCreator(String createdby, int pagesize, int pageindex) {
         ArrayList<LeaveRequest> list = new ArrayList<>();
+
+        if (pageindex < 1) {
+            pageindex = 1;
+        }
+        if (pagesize < 1) {
+            pagesize = 10;
+        }
+
+        int offset = (pageindex - 1) * pagesize;
+
         try {
             String sql = "SELECT r.rid, r.title, r.reason, r.[from], r.[to], r.createddate, r.[status], "
                     + "u.username, u.displayname, e.eid, e.ename, d.did, d.dname "
@@ -136,10 +202,19 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
                     + "INNER JOIN Users u ON u.username = r.createdby "
                     + "INNER JOIN Employees e ON e.eid = u.eid "
                     + "INNER JOIN Departments d ON d.did = e.did "
-                    + "WHERE r.createdby = ?";
+                    + "WHERE r.createdby = ? "
+                    + "ORDER BY r.rid ASC "
+                    + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY;";
+
+            System.out.println("SQL OFFSET: " + offset + ", FETCH NEXT: " + pagesize);
+
             PreparedStatement stm = connection.prepareStatement(sql);
             stm.setString(1, createdby);
+            stm.setInt(2, offset);
+            stm.setInt(3, pagesize);
+
             ResultSet rs = stm.executeQuery();
+
             while (rs.next()) {
                 LeaveRequest r = new LeaveRequest();
                 r.setId(rs.getInt("rid"));
@@ -160,17 +235,22 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
                 e.setId(rs.getInt("eid"));
                 e.setName(rs.getString("ename"));
 
-//                EmployeeDBContext db = new EmployeeDBContext();
-//                e.setManager(db.get(rs.getInt("managerid")));
                 Department d = new Department();
                 e.setDept(d);
                 d.setId(rs.getInt("did"));
                 d.setName(rs.getString("dname"));
+
                 list.add(r);
             }
+
+            rs.close();
+            stm.close();
+
         } catch (SQLException ex) {
             Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        System.out.println("Fetched records: " + list.size());
         return list;
     }
 
@@ -208,48 +288,48 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
 
     }
 
-    public ArrayList<LeaveRequest> getByManager(int managerId) {
+    public ArrayList<LeaveRequest> getByManager(int managerId, int pagesize, int pageindex) {
         ArrayList<LeaveRequest> requests = new ArrayList<>();
+
+        if (pageindex < 1) {
+            pageindex = 1;
+        }
+        if (pagesize < 1) {
+            pagesize = 10;
+        }
+
+        int offset = (pageindex - 1) * pagesize;
+
         try {
-            String sql = "WITH EmployeeHierarchy AS (\n"
-                    + "    SELECT \n"
-                    + "        eid,\n"
-                    + "		ename,\n"
-                    + "        managerid,\n"
-                    + "		did,\n"
-                    + "        0 AS [Level]\n"
-                    + "    FROM Employees\n"
-                    + "    WHERE eid = ? \n"
-                    + "\n"
-                    + "    UNION ALL\n"
-                    + "\n"
-                    + "    SELECT \n"
-                    + "        e.eid,\n"
-                    + "		e.ename,\n"
-                    + "        e.managerid,\n"
-                    + "		e.did,\n"
-                    + "        eh.Level + 1\n"
-                    + "    FROM Employees e\n"
-                    + "    INNER JOIN EmployeeHierarchy eh ON eh.eid = e.managerid\n"
-                    + ")\n"
-                    + "\n"
-                    + "SELECT \n"
-                    + "    lr.rid,\n"
-                    + "    lr.title,\n"
-                    + "    lr.reason,\n"
-                    + "    lr.[from],\n"
-                    + "    lr.[to],\n"
-                    + "    lr.status,\n"
-                    + "lr.createddate,\n"
-                    + "	u.username, u.displayname, eh.eid, eh.ename, d.did, d.dname\n"
-                    + "FROM EmployeeHierarchy eh\n"
-                    + "INNER JOIN Users u ON u.eid = eh.eid\n"
-                    + "INNER JOIN LeaveRequest lr ON lr.createdby = u.username\n"
-                    + "INNER JOIN Departments d ON d.did = eh.did\n"
-                    + "WHERE eh.Level > 0;";
+            String sql = "WITH EmployeeHierarchy AS ( "
+                    + "SELECT eid, ename, managerid, did, 0 AS [Level] "
+                    + "FROM Employees WHERE eid = ? "
+                    + "UNION ALL "
+                    + "SELECT e.eid, e.ename, e.managerid, e.did, eh.Level + 1 "
+                    + "FROM Employees e INNER JOIN EmployeeHierarchy eh ON eh.eid = e.managerid "
+                    + ") "
+                    + "SELECT lr.rid, lr.title, lr.reason, lr.[from], lr.[to], lr.status, lr.createddate, "
+                    + "u.username, u.displayname, eh.eid, eh.ename, d.did, d.dname "
+                    + "FROM EmployeeHierarchy eh "
+                    + "INNER JOIN Users u ON u.eid = eh.eid "
+                    + "INNER JOIN LeaveRequest lr ON lr.createdby = u.username "
+                    + "INNER JOIN Departments d ON d.did = eh.did "
+                    + "WHERE eh.Level > 0 "
+                    + "ORDER BY lr.rid ASC "
+                    + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY;";
 
             PreparedStatement stm = connection.prepareStatement(sql);
-            stm.setInt(1, managerId);
+
+            // ✅ Đúng thứ tự tham số truyền vào
+            stm.setInt(1, managerId); // eid = ?
+            stm.setInt(2, offset);    // OFFSET ?
+            stm.setInt(3, pagesize);  // FETCH NEXT ?
+
+            System.out.println("managerId = " + managerId);
+            System.out.println("pageindex = " + pageindex);
+            System.out.println("pagesize = " + pagesize);
+            System.out.println("offset = " + offset);
+
             ResultSet rs = stm.executeQuery();
 
             while (rs.next()) {
@@ -272,22 +352,21 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
                 e.setId(rs.getInt("eid"));
                 e.setName(rs.getString("ename"));
 
-                EmployeeDBContext db = new EmployeeDBContext();
-
-                e.setManager(db.get(managerId)); // Gán manager ID
-
                 Department d = new Department();
                 e.setDept(d);
                 d.setId(rs.getInt("did"));
                 d.setName(rs.getString("dname"));
 
                 requests.add(r);
-
             }
+
+            rs.close();
+            stm.close();
+
         } catch (SQLException ex) {
-            Logger.getLogger(LeaveRequestDBContext.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
         }
+
         return requests;
     }
 
