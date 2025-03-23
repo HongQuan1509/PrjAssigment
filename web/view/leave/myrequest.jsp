@@ -21,6 +21,8 @@
             <h2 class="text-center">My Leave Request</h2>
             <div id="toppagger" class="pagger mb-3"></div>
 
+            <p class="text-end">Page ${pageindex} of ${totalpage}, showing ${requestScope.size} records.</p>
+            
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
                     <tr>

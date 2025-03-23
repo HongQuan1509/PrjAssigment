@@ -82,59 +82,60 @@ public class LeaveRequestDBContext extends DBContext<LeaveRequest> {
     }
 
     @Override
-    public LeaveRequest get(int id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+   public LeaveRequest get( int rid) {
+    LeaveRequest r = null;
+    try {
+        String sql = "SELECT r.rid, r.title, r.reason, r.[from], r.[to], r.createddate, r.[status], "
+                + "u.username, u.displayname, e.eid, e.ename,e.managerid, d.did, d.dname "
+                + "FROM LeaveRequest r "
+                + "INNER JOIN Users u ON u.username = r.createdby "
+                + "INNER JOIN Employees e ON e.eid = u.eid "
+                + "INNER JOIN Departments d ON d.did = e.did "
+                + "WHERE r.rid = ?";
+        PreparedStatement stm = connection.prepareStatement(sql);
+        
+        stm.setInt(1, rid);
+        ResultSet rs = stm.executeQuery();
 
-    public LeaveRequest get(int mid, int rid) {
-        LeaveRequest r = new LeaveRequest();
-        try {
-            String sql = "SELECT r.rid, r.title, r.reason, r.[from], r.[to], r.createddate, r.[status], "
-                    + "u.username, u.displayname, e.eid, e.ename, d.did, d.dname "
-                    + "FROM LeaveRequest r "
-                    + "INNER JOIN Users u ON u.username = r.createdby "
-                    + "INNER JOIN Employees e ON e.eid = u.eid "
-                    + "INNER JOIN Departments d ON d.did = e.did "
-                    + "WHERE e.managerid = ? AND r.rid = ?";
-            PreparedStatement stm = connection.prepareStatement(sql);
-            stm.setInt(1, mid);
-            stm.setInt(2, rid);
-            ResultSet rs = stm.executeQuery();
-            while (rs.next()) {
-                r.setId(rs.getInt("rid"));
-                r.setTitle(rs.getString("title"));
-                r.setReason(rs.getString("reason"));
-                r.setFrom(rs.getDate("from"));
-                r.setTo(rs.getDate("to"));
-                r.setCreateddate(rs.getTimestamp("createddate"));
-                r.setStatus(rs.getInt("status"));
+        if (rs.next()) {
+            r = new LeaveRequest();
 
-                User u = new User();
-                u.setUsername(rs.getString("username"));
-                u.setDisplayname(rs.getString("displayname"));
-                r.setCreatedby(u);
+            r.setId(rs.getInt("rid"));
+            r.setTitle(rs.getString("title"));
+            r.setReason(rs.getString("reason"));
+            r.setFrom(rs.getDate("from"));
+            r.setTo(rs.getDate("to"));
+            r.setCreateddate(rs.getTimestamp("createddate"));
+            r.setStatus(rs.getInt("status"));
 
-                Employee e = new Employee();
-                u.setE(e);
-                e.setId(rs.getInt("eid"));
-                e.setName(rs.getString("ename"));
+            User u = new User();
+            u.setUsername(rs.getString("username"));
+            u.setDisplayname(rs.getString("displayname"));
+            r.setCreatedby(u);
 
-                EmployeeDBContext db = new EmployeeDBContext();
+            Employee e = new Employee();
+            e.setId(rs.getInt("eid"));
+            e.setName(rs.getString("ename"));
+            u.setE(e);
 
-                e.setManager(db.get(mid)); // Gán manager ID
+            EmployeeDBContext db = new EmployeeDBContext();
+            e.setManager(db.get(rs.getInt("managerid")));
 
-                Department d = new Department();
-                e.setDept(d);
-                d.setId(rs.getInt("did"));
-                d.setName(rs.getString("dname"));
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(LeaveRequestDBContext.class
-                    .getName()).log(Level.SEVERE, null, ex);
+            Department d = new Department();
+            d.setId(rs.getInt("did"));
+            d.setName(rs.getString("dname"));
+            e.setDept(d);
         }
-        return r;
 
+        rs.close();
+        stm.close();
+
+    } catch (SQLException ex) {
+        Logger.getLogger(LeaveRequestDBContext.class.getName()).log(Level.SEVERE, null, ex);
     }
+    return r;
+}
+
 
     public LeaveRequest getByTitle(int mid, String title) {
         LeaveRequest r = new LeaveRequest();

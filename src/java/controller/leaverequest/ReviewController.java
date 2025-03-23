@@ -25,7 +25,7 @@ public class ReviewController extends BaseRequiredAuthenticationController {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp, User user) throws ServletException, IOException {
         String raw_id = req.getParameter("requestid");
         String action = req.getParameter("action");
-
+        System.out.println(raw_id);
         if (raw_id == null || raw_id.isEmpty()) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Thiếu request ID.");
             return;
@@ -41,8 +41,8 @@ public class ReviewController extends BaseRequiredAuthenticationController {
 
         LeaveRequestDBContext db = new LeaveRequestDBContext();
         try {
-            LeaveRequest leave = db.get(user.getE().getId(), requestId);
-
+            LeaveRequest leave = db.get(requestId);
+            
             if (leave == null || leave.getId() == 0) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy đơn nghỉ phép.");
                 return;
